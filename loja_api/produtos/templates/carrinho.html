@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ptbr">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <style>
+    body {
+            background: linear-gradient(180deg, #0A192F 0%, #112A45 100%);
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 400;
+            padding-top: 80px;
+        }
+  </style>
+</head>
+<body>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">🛒 Carrinho de Compras</h2>
+
+    {% if carrinho.itens %}
+    <div class="row">
+        <!-- Lista de produtos -->
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4" style="background-color:#112A45; color:white;">
+                <div class="card-body">
+                    <h5 class="card-title">Itens do Carrinho</h5>
+                    <hr style="border-color:#444;">
+
+                    {% for item in carrinho.itens %}
+                    <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                        <div class="d-flex align-items-center">
+                            <img src="{{ item.produto.imagem.url }}" alt="{{ item.produto.nome }}" width="80" height="80" class="me-3 rounded">
+                            <div>
+                                <h6 class="mb-0">{{ item.produto.nome }}</h6>
+                                <small class="text-warning">R$ {{ item.produto.preco }}</small>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center">
+                            <form method="post" action="{% url 'atualizar_carrinho' item.id %}" class="d-flex">
+                                {% csrf_token %}
+                                <input type="number" name="quantidade" value="{{ item.quantidade }}" min="1" class="form-control form-control-sm me-2" style="width:70px; background:#0A192F; color:white; border:1px solid #444;">
+                                <button type="submit" class="btn btn-sm btn-outline-warning me-2">↻</button>
+                            </form>
+                            <form method="post" action="{% url 'remover_do_carrinho' item.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">✖</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumo do pedido -->
+        <div class="col-md-4">
+            <div class="card shadow-sm" style="background-color:#112A45; color:white;">
+                <div class="card-body">
+                    <h5 class="card-title">Resumo do Pedido</h5>
+                    <hr style="border-color:#444;">
+                    <p class="d-flex justify-content-between">
+                        <span>Subtotal</span>
+                        <span>R$ {{ carrinho.subtotal }}</span>
+                    </p>
+                    <p class="d-flex justify-content-between">
+                        <span>Frete</span>
+                        <span>R$ {{ carrinho.frete }}</span>
+                    </p>
+                    <h5 class="d-flex justify-content-between mt-3">
+                        <span>Total</span>
+                        <span class="text-success">R$ {{ carrinho.total }}</span>
+                    </h5>
+                    <a href="{% url 'checkout' %}" class="btn btn-warning w-100 mt-3 fw-bold">Finalizar Compra</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+        <p class="text-center text-muted">Seu carrinho está vazio.</p>
+    {% endif %}
+</div>
+{% endblock %}
+</body>
+</html>

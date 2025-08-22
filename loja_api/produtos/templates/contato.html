@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container text-center mt-5">
+    <h2 style="color: white">📱 Entre em Contato</h2>
+
+    <form class="mt-3" method="post">
+        {% csrf_token %}
+        <input type="text" class="form-control mb-3" placeholder="Seu nome">
+        <input type="email" class="form-control mb-3" placeholder="Seu email">
+        <textarea class="form-control mb-3" rows="5" placeholder="Sua mensagem"></textarea>
+        <button type="submit" class="btn btn-warning">Enviar</button>
+    </form>
+</div>
+{% endblock %}

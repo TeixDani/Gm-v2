@@ -1,0 +1,288 @@
+{% load static %}
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Produtos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(180deg, #0A192F 0%, #112A45 100%);
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 400;
+            padding-top: 80px;
+        }
+        h1, h2, h3, h5 { font-weight: 700; }
+
+        /* Topbar */
+        .topbar {
+            background-color: #112A45;
+            height: 70px;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%;
+            z-index: 1100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 25px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.45);
+        }
+        .topbar img {
+            height: 60px;
+            width: auto;
+        }
+        .burger { font-size: 28px; cursor: pointer; color: white; }
+
+        /* Barra de pesquisa */
+        .search-box {
+            flex: 1;
+            max-width: 450px;
+            margin: 0 25px;
+        }
+        .search-box input {
+            background: #0A192F;
+            border: 1px solid #1E3A5F;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 25px;
+            width: 100%;
+            outline: none;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+        .search-box input:focus {
+            border-color: #FFC107;
+            background: #132C46;
+        }
+        .search-box input::placeholder { color: #bbb; }
+
+        /* Sidebar */
+        .sidebar {
+            height: 100%; width: 0;
+            position: fixed; top: 0; left: 0;
+            background: linear-gradient(180deg, #112A45 0%, #0A192F 100%);
+            overflow-x: hidden;
+            transition: 0.4s;
+            z-index: 1200;
+            box-shadow: 3px 0 10px rgba(0,0,0,0.4);
+            padding-top: 70px;
+        }
+        .sidebar.open { width: 240px; }
+
+        .sidebar .close-btn {
+            position: absolute;
+            top: 20px; left: 20px;
+            font-size: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 50%;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .sidebar .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .sidebar a {
+            padding: 14px 30px;
+            text-decoration: none;
+            font-size: 17px;
+            color: #d1d1d1;
+            display: block;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        .sidebar a:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.06);
+            border-left: 3px solid #FFC107;
+        }
+
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            background: #112A45;
+        }
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
+        .card-body {
+            background-color: #112A45;
+            color: white;
+            padding: 20px;
+        }
+        .card-title { color: #fff; font-size: 1.25rem; }
+        .card-text { color: #cfd8dc; }
+        .category-text { color: #FFC107; font-size: 0.9rem; }
+        .price { font-weight: bold; color: #28a745; font-size: 1.1rem; }
+        .badge { background-color: #c45500; color: white; }
+
+        /* Sem produtos */
+        .no-products {
+            text-align: center;
+            font-size: 18px;
+            color: #bbb;
+            padding: 40px;
+        }
+
+        /* Hover Trailer */
+        .game-card { position: relative; overflow: hidden; }
+        .game-image, .game-trailer {
+            width: 100%;
+            height: 585px; /* MANTIDA a resolução */
+            object-fit: cover;
+            display: block;
+            transition: opacity 0.4s ease-in-out;
+        }
+        .game-trailer {
+            position: absolute;
+            top: 0; left: 0;
+            opacity: 0;
+            pointer-events: none;
+            width: 100%;
+            height: 585px; /* MANTIDA a resolução */
+        }
+        .game-card:hover .game-image { opacity: 0; }
+        .game-card:hover .game-trailer {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Ver mais / Ver menos */
+        .toggle-desc {
+            cursor: pointer;
+            font-weight: 600;
+            margin-left: 5px;
+            color: #FFC107;
+            text-decoration: none;
+        }
+        .toggle-desc:hover { text-decoration: underline; }
+
+        /* Header */
+        .site-header {
+            margin-bottom: 30px;
+        }
+        .site-header h2 {
+            font-size: 2rem;
+            border-bottom: 3px solid #FFC107;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+    </style>
+</head>
+<body>
+
+    <!-- Topbar -->
+    <div class="topbar">
+        <span class="burger" onclick="toggleSidebar()">☰</span>
+
+        <!-- Barra de pesquisa -->
+        <div class="search-box">
+            <form method="get" action="{% url 'lista_produtos' %}">
+                <input type="text" name="q" placeholder="🔍 Buscar produtos..." value="{{ request.GET.q }}">
+            </form>
+        </div>
+
+        <img src="/media/logos/Logo_gwkVAyD.png" alt="Logo">
+    </div>
+
+    <!-- Sidebar -->
+    <div id="mySidebar" class="sidebar">
+        <span class="close-btn" onclick="toggleSidebar()">✖</span>
+
+        <div class="sidebar-links mt-4">
+            <a href="{% url 'home' %}">🏠 Início</a>
+            <a href="{% url 'lista_produtos' %}">🛍️ Produtos</a>
+            <a href="{% url 'carrinho' %}">🛒 Carrinho</a>
+            <a href="{% url 'cartao' %}">💳 Cartão</a>
+            <a href="{% url 'contato' %}">📱 Contato</a>
+        </div>
+    </div>
+
+    <!-- Conteúdo -->
+    <div class="container mt-4">
+        <div class="site-header text-center">
+            <h2>Produtos</h2>
+        </div>
+        <div class="row">
+            {% for produto in produtos %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm game-card">
+                    {% if produto.imagem %}
+                        <img src="{{ produto.imagem.url }}" alt="{{ produto.nome }}" class="card-img-top game-image">
+                    {% else %}
+                        <img src="https://via.placeholder.com/300x200?text=Sem+Imagem" class="card-img-top game-image">
+                    {% endif %}
+
+                    {% if produto.trailer %}
+                        <iframe class="game-trailer"
+                                src="https://www.youtube.com/embed/{{ produto.trailer }}?autoplay=1&mute=1&loop=1&playlist={{ produto.trailer }}"
+                                frameborder="0"
+                                allow="autoplay; encrypted-media"
+                                allowfullscreen></iframe>
+                    {% endif %}
+
+                    <div class="card-body">
+                        <h5 class="card-title">{{ produto.nome }}</h5>
+                        <p class="card-text category-text">Categoria: {{ produto.categoria.nome }}</p>
+
+                        <p class="card-text description-text">
+                            {% if produto.descricao %}
+                                <span class="short-text">{{ produto.descricao|slice:":150" }}...</span>
+                                <span class="full-text d-none">{{ produto.descricao }}</span>
+                                <a href="javascript:void(0)" class="toggle-desc" onclick="toggleDescription(this)">Ver mais...</a>
+                            {% else %}
+                                <span class="text-muted">Sem descrição</span>
+                            {% endif %}
+                        </p>
+
+                        <p class="card-text price">R$ {{ produto.preco }}</p>
+                        {% if produto.promocao %}
+                            <span class="badge">Promoção</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+                {% if request.GET.q %}
+                    <p class="no-products">Nenhum produto encontrado para "{{ request.GET.q }}".</p>
+                {% else %}
+                    <p class="no-products">Nenhum produto cadastrado.</p>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById("mySidebar").classList.toggle("open");
+        }
+
+        function toggleDescription(link) {
+            let card = link.closest(".card-text");
+            let shortText = card.querySelector(".short-text");
+            let fullText = card.querySelector(".full-text");
+
+            if (fullText.classList.contains("d-none")) {
+                shortText.classList.add("d-none");
+                fullText.classList.remove("d-none");
+                link.textContent = "Ver menos...";
+            } else {
+                shortText.classList.remove("d-none");
+                fullText.classList.add("d-none");
+                link.textContent = "Ver mais...";
+            }
+        }
+    </script>
+</body>
+</html>
